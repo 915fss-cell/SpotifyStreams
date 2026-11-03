@@ -11,6 +11,9 @@ async function migrate() {
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort();
   const client = await pool.connect();
   try {
+    // Serialize deploys so two runners cannot apply the same migration together.
+    await client.query('SELECT pg_advisory_lock(8472319)');
+
     // Keep migration state in the database so a second deploy does not replay
     // ALTER TABLE statements against an already-provisioned Supabase database.
     await client.query(`
@@ -46,10 +49,8 @@ async function migrate() {
       }
     }
     console.log('[migrate] All migrations applied.');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
   } finally {
+    await client.query('SELECT pg_advisory_unlock(8472319)').catch(() => {});
     client.release();
     await pool.end();
   }
