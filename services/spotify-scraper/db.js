@@ -56,14 +56,13 @@ async function todayIstanbul(client) {
  */
 async function upsertAlbum(client, album) {
   await client.query(
-    `INSERT INTO albums (id, title, release_date, image_url, album_group)
-     VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (id) DO UPDATE
-       SET title        = EXCLUDED.title,
-           release_date = EXCLUDED.release_date,
-           image_url    = COALESCE(EXCLUDED.image_url, albums.image_url),
-           album_group  = COALESCE(EXCLUDED.album_group, albums.album_group)`,
-    [album.id, album.title, album.release_date, album.image_url || null, album.album_group || null]
+`INSERT INTO albums (id, title, release_date, album_group)
+  VALUES ($1, $2, $3, $4)
+  ON CONFLICT (id) DO UPDATE
+  SET title        = EXCLUDED.title,
+  release_date = EXCLUDED.release_date,
+  album_group  = COALESCE(EXCLUDED.album_group, albums.album_group)`,
+  [album.id, album.title, album.release_date, album.album_group || null]
   );
 }
 

@@ -1531,7 +1531,7 @@ app.get(['/api/charts', '/api/ai-charts'], requireAuth,
           s.title,
           s.album_id,
           a.title AS album_title,
-          a.image_url AS cover_url,
+          NULL::text AS cover_url,
           a.album_group,
           credit.artist_id,
           credit.artist_name,
@@ -1716,7 +1716,7 @@ app.get(['/api/charts', '/api/ai-charts'], requireAuth,
         -- Rewind and other editions can have their physical tracks rooted on
         -- the deluxe edition. Pull those copies only for albums already in the
         -- category scope; the old all-songs join caused multi-minute spills.
-        SELECT credit.artist_id, s.album_id, a.title, a.image_url, a.album_group,
+        SELECT credit.artist_id, s.album_id, a.title, NULL::text AS cover_url, a.album_group,
                COALESCE(s.canonical_id, s.id), s.title
         FROM album_candidate_ids candidate_album
         JOIN songs s ON s.album_id = candidate_album.album_id
@@ -2153,7 +2153,7 @@ app.get('/api/songs', requireAuth, validateArtistAccess,
         CASE 
           WHEN s.album_id IN ('0tcExuDWMQdBbwSpqN8Ku2', '2scB1uhcCI1TSf6b9TCZK3', '51lCQxAHpJHuqvvK0z12zp', '1tze7ApbUfn71mNcaixlX6', '3N1D55OU4TgweV2SSx6rpl', '2T4Y4BOSbReX4EEM79hIO6', '5DEGO898K51fENd1Jt0Rek', '3E81KB8Gxn4kkh8GP5M3DK', '6G2boZuVyTIIxlmTG52NsI', '0NvpeY8oCm6oIlhH5Jw4fo') THEN 'https://i.scdn.co/image/ab67616d0000b273c68f26a3d34fbd0faed2b473'
           WHEN s.album_id IN (${ATD_REMIX_SINGLE_IDS_SQL}) THEN '${ATD_ULTIMATE_COVER}'
-          ELSE a.image_url
+          ELSE NULL::text
         END AS album_cover_url,
         dsc.recorded_date,
         dsc.cumulative::bigint AS cumulative,
@@ -2260,7 +2260,7 @@ app.get('/api/trending', requireAuth, validateArtistAccess,
         SELECT
           s.id, s.title, s.is_featured,
           a.title AS album_title,
-          a.image_url AS album_cover_url,
+          NULL::text AS album_cover_url,
           win.cumulative, win.recent_avg, win.base_avg
         FROM win
         JOIN songs s ON s.id = win.canonical_id
