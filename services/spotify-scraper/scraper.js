@@ -253,6 +253,7 @@ async function processAlbum(page, client, album, artistUri, stats, backdateFirst
       track_number:   track.track_number,
       is_featured:    isFeaturedTrack,
       primary_artist: artistUri,
+      artist_ids:     (track.artistUris || []).map(uri => uri.split(':')[2]).filter(Boolean),
       is_solo:        isSolo,
     });
     if (track.playCount > 0) {

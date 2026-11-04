@@ -1097,6 +1097,7 @@ app.get('/api/spotify/streams', async (req, res) => {
           s.title,
           s.album_id,
           s.primary_artist,
+          COALESCE(s.artist_ids, ARRAY[]::text[]) AS artist_ids,
           ss.stream_count,
           ss.recorded_date
         FROM songs s
