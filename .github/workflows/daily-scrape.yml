@@ -47,6 +47,12 @@ jobs:
         working-directory: services/spotify-scraper
         run: npm ci
 
+      - name: Apply database migrations
+        working-directory: services/spotify-scraper
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: node migrate.js
+
       - name: Run scraper
         id: scraper
         working-directory: services/spotify-scraper
