@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('node:crypto');
 const path = require('path');
 const fs = require('fs');
 const compression = require('compression');
@@ -1049,6 +1050,71 @@ app.use(async (req, res, next) => { // JT_ARTIST_ID is declared further down; th
 // JC Chasez stays locked separately via validateArtistAccess / isJcAllowed
 // (X-JC-Passcode header), which do NOT depend on this middleware.
 const requireAuth = (req, res, next) => next();
+
+const spotifyStreamsApiKey = process.env.SPOTIFY_STREAMS_API_KEY || '';
+
+function hasSpotifyStreamsApiKey(req) {
+  const provided = req.get('x-api-key') ||
+    (req.get('authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!spotifyStreamsApiKey || !provided) return false;
+  const expectedBuffer = Buffer.from(spotifyStreamsApiKey);
+  const providedBuffer = Buffer.from(provided);
+  return expectedBuffer.length === providedBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+// Read-only integration endpoint for downstream websites. It deliberately uses
+// the server-side database pool so database credentials and SP_DC never leave
+// this service.
+app.get('/api/spotify/streams', async (req, res) => {
+  if (!spotifyStreamsApiKey) {
+    return res.status(503).json({ error: 'Spotify streams API is not configured' });
+  }
+  if (!hasSpotifyStreamsApiKey(req)) {
+    res.setHeader('WWW-Authenticate', 'Bearer');
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const [artistsResult, songsResult] = await Promise.all([
+      dbQuery(`
+        SELECT DISTINCT ON (ta.artist_id)
+          ta.artist_id,
+          ta.name,
+          ta.image_url,
+          ast.monthly_listeners,
+          ast.followers,
+          ast.world_rank,
+          ast.recorded_date
+        FROM tracked_artists ta
+        LEFT JOIN artist_stats ast ON ast.artist_id = ta.artist_id
+        WHERE ta.active = TRUE
+        ORDER BY ta.artist_id, ast.recorded_date DESC NULLS LAST, ast.recorded_at DESC NULLS LAST
+      `),
+      dbQuery(`
+        SELECT DISTINCT ON (s.id)
+          s.id AS song_id,
+          s.title,
+          s.album_id,
+          s.primary_artist,
+          ss.stream_count,
+          ss.recorded_date
+        FROM songs s
+        JOIN stream_stats ss ON ss.song_id = s.id
+        ORDER BY s.id, ss.recorded_date DESC, ss.recorded_at DESC
+      `),
+    ]);
+
+    return res.json({
+      generated_at: new Date().toISOString(),
+      artists: artistsResult.rows,
+      songs: songsResult.rows,
+    });
+  } catch (error) {
+    console.error('[spotify-streams-api] Failed to load data:', error.message);
+    return res.status(500).json({ error: 'Unable to load Spotify data' });
+  }
+});
 
 // Keep-alive ping target (cron-job.org, every 10 min) — keeps Render's free
 // instance from spinning down. Deliberately does NOT touch the DB so Neon can
