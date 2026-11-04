@@ -253,7 +253,12 @@ async function processAlbum(page, client, album, artistUri, stats, backdateFirst
       track_number:   track.track_number,
       is_featured:    isFeaturedTrack,
       primary_artist: artistUri,
-      artist_ids:     (track.artistUris || []).map(uri => uri.split(':')[2]).filter(Boolean),
+      // The track metadata can omit credited artists on fallback album responses.
+      // The current scrape bucket is still authoritative for this association.
+      artist_ids:     [...new Set([
+        artistId,
+        ...(track.artistUris || []).map(uri => uri.split(':')[2]).filter(Boolean),
+      ])],
       is_solo:        isSolo,
     });
     if (track.playCount > 0) {
