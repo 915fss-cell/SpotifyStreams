@@ -37,14 +37,17 @@ function upgradeAvatarUrl(url) {
   return small ? url.replace(small, AVATAR_LARGE_PREFIX) : null;
 }
 
-async function backfillMissingArtistPhotos(page, client) {
+async function backfillMissingArtistPhotos(page, client, refreshAll = false) {
   try {
     const missing = await client.query(
       // A pasted open.spotify.com profile LINK is not a photo (brunette had
-      // one): treat it as missing so the real image replaces it.
-      `SELECT artist_id, name FROM tracked_artists
+      // one): treat it as missing so the real image replaces it. On a complete
+      // daily scrape, refresh every active artist so Spotify profile changes
+      // are reflected instead of preserving an obsolete stored URL.
+      `SELECT artist_id, name, image_url FROM tracked_artists
         WHERE active = true
-          AND (image_url IS NULL OR image_url = '' OR image_url LIKE 'https://open.spotify.com/%')`
+          AND ($1::boolean OR image_url IS NULL OR image_url = '' OR image_url LIKE 'https://open.spotify.com/%')`,
+      [refreshAll]
     );
     for (const art of missing.rows) {
       const url = await fetchArtistAvatar(page, art.artist_id);
@@ -1175,7 +1178,7 @@ async function run() {
         }
       }
 
-      await backfillMissingArtistPhotos(page, client);
+      await backfillMissingArtistPhotos(page, client, true);
 
       // Spotify sometimes takes streams back (Britney "Gimme More", 2026-08-18,
       // −3.13M). The writer's stale-skip refuses to record a lower count, so a
