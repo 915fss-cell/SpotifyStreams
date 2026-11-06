@@ -1059,6 +1059,65 @@ function hasSpotifyStreamsApiKey(req) {
     crypto.timingSafeEqual(expectedBuffer, providedBuffer);
 }
 
+// Read-only historical integration endpoint for downstream websites. It
+// deliberately uses the server-side database pool so credentials never leave
+// this service.
+app.get('/api/spotify/history', async (req, res) => {
+  if (!spotifyStreamsApiKey) {
+    return res.status(503).json({ error: 'Spotify streams API is not configured' });
+  }
+  if (!hasSpotifyStreamsApiKey(req)) {
+    res.setHeader('WWW-Authenticate', 'Bearer');
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const artistId = String(req.query.artist_id || '').trim().replace('spotify:artist:', '');
+  const from = String(req.query.from || '');
+  const to = String(req.query.to || '');
+  const params = [];
+  const filters = [];
+
+  if (artistId) {
+    if (!/^[A-Za-z0-9]{22}$/.test(artistId)) {
+      return res.status(400).json({ error: 'Invalid artist_id.' });
+    }
+    params.push(artistId);
+    filters.push(`$${params.length} = ANY(COALESCE(s.artist_ids, ARRAY[]::text[]))`);
+  }
+  if (from) {
+    params.push(from);
+    filters.push(`ss.recorded_date >= $${params.length}::date`);
+  }
+  if (to) {
+    params.push(to);
+    filters.push(`ss.recorded_date <= $${params.length}::date`);
+  }
+
+  try {
+    const result = await dbQuery(`
+      SELECT ss.recorded_date,
+             SUM(ss.stream_count)::bigint AS stream_count,
+             COUNT(DISTINCT ss.song_id)::int AS song_count
+      FROM stream_stats ss
+      JOIN songs s ON s.id = ss.song_id
+      WHERE ${filters.length ? filters.join(' AND ') : 'TRUE'}
+      GROUP BY ss.recorded_date
+      ORDER BY ss.recorded_date ASC
+    `, params);
+
+    return res.json({
+      generated_at: new Date().toISOString(),
+      artist_id: artistId || null,
+      from: from || null,
+      to: to || null,
+      history: result.rows,
+    });
+  } catch (error) {
+    console.error('[spotify-history-api] Failed to load history:', error.message);
+    return res.status(500).json({ error: 'Unable to load Spotify history' });
+  }
+});
+
 // Read-only integration endpoint for downstream websites. It deliberately uses
 // the server-side database pool so database credentials and SP_DC never leave
 // this service.
