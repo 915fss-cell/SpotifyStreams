@@ -56,13 +56,14 @@ async function todayIstanbul(client) {
  */
 async function upsertAlbum(client, album) {
   await client.query(
-`INSERT INTO albums (id, title, release_date, album_group)
-  VALUES ($1, $2, $3, $4)
+`INSERT INTO albums (id, title, release_date, album_group, image_url)
+  VALUES ($1, $2, $3, $4, $5)
   ON CONFLICT (id) DO UPDATE
   SET title        = EXCLUDED.title,
   release_date = EXCLUDED.release_date,
-  album_group  = COALESCE(EXCLUDED.album_group, albums.album_group)`,
-  [album.id, album.title, album.release_date, album.album_group || null]
+  album_group  = COALESCE(EXCLUDED.album_group, albums.album_group),
+  image_url    = COALESCE(EXCLUDED.image_url, albums.image_url)`,
+  [album.id, album.title, album.release_date, album.album_group || null, album.image_url || null]
   );
 }
 
@@ -322,7 +323,7 @@ async function recordStreamDrops(client, drops, observedDate) {
 // clampIds: verilirse tıraşlama YALNIZCA bu şarkı id'lerine uygulanır, canonical
 // ailenin tamamına değil. Ailede doğru değeri taşıyan bir üye varsa şart:
 // "Until the End of Time"ın grubunda solo kopyalar yanlış (düetin sayısını
-// taşıyorlar) ama düetin kendi 99,953,435'i doğru — aile geneline tıraş atmak
+// taşıyorlar) ama düetin kendi 99,953,435'i doğru �� aile geneline tıraş atmak
 // düetten 69,5M götürürdü.
 //
 // verify: async (songIds) => Map(songId -> playcount|null). ŞARKININ KENDİ
