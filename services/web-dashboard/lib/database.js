@@ -15,7 +15,7 @@ function databaseConfig(env = process.env) {
     if (!['postgres:', 'postgresql:'].includes(url.protocol)) throw new Error();
   } catch {
     throw new Error(
-      'A valid PostgreSQL URL is required in DATABASE_URL, POSTGRES_URL_NON_POOLING, or POSTGRES_URL.',
+      'DATABASE_URL must be a valid PostgreSQL URL.',
     );
   }
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
