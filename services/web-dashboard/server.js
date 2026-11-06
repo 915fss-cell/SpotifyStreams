@@ -48,18 +48,14 @@ app.use((req, res, next) => {
 // migration is applied), so the site never breaks. The table is the source of
 // truth once seeded; this stays as a safety net.
 const ARTIST_ROSTER_FALLBACK = [
-  { artist_id: '31TPClRtHm23RisEBtV3X7', name: 'Justin Timberlake', image_url: '/images/jt.jpg',                                                  accent: '#1ed760', sort_order: 1,  album_only: false, locked: false },
-  { artist_id: '5L1lO4eRHmJ7a0Q6csE5cT', name: 'LISA',              image_url: 'https://i.scdn.co/image/ab6761610000e5eb5cd3b3af8b72e32be78571ec', accent: '#ffd700', sort_order: 2,  album_only: false, locked: false },
-  { artist_id: '2dIgFjalVxs4ThymZ67YCE', name: 'Stray Kids',        image_url: 'https://i.scdn.co/image/ab6761610000e5ebf9887d2c9288f0e50a3fd69f', accent: '#e2e2e7', sort_order: 3,  album_only: false, locked: false },
-  { artist_id: '4UIOuc84ExWojcUzFGtb8W', name: 'Felix',             image_url: 'https://i.scdn.co/image/ab6761610000e5eb51e1a166ae0cc73d8ec19909', accent: '#ffb703', sort_order: 4,  album_only: false, locked: false },
-  { artist_id: '2W8yFh0Ga6Yf3jiayVxwkE', name: 'Dove Cameron',      image_url: 'https://i.scdn.co/image/ab6761610000e5eb0c5fcd837c1420d97f500ef9', accent: '#b794f6', sort_order: 5,  album_only: false, locked: false },
-  { artist_id: '1HY2Jd0NmPuamShAr6KMms', name: 'Lady Gaga',         image_url: 'https://i.scdn.co/image/ab6761610000e5ebaadc18cac8d48124357c38e6', accent: '#ff52a2', sort_order: 6,  album_only: true,  locked: false },
-  { artist_id: '6qqNVTkY8uBg9cP3Jd7DAH', name: 'Billie Eilish',     image_url: 'https://i.scdn.co/image/ab6761610000e5eb4a21b4760d2ecb7b0dcdc8da', accent: '#bad80a', sort_order: 7,  album_only: false, locked: false },
-  { artist_id: '66CXWjxzNUsdJxJ2JdwvnR', name: 'Ariana Grande',     image_url: 'https://i.scdn.co/image/ab6761610000e5eb766397ec42a573a53eb5fb87', accent: '#b39ddb', sort_order: 8,  album_only: true,  locked: false },
-  { artist_id: '6Ff53KvcvAj5U7Z1vojB5o', name: '*NSYNC',            image_url: 'https://i.scdn.co/image/ab6761610000e5eb9414ef07d0ca697726912df1', accent: '#3498db', sort_order: 9,  album_only: false, locked: false },
-  { artist_id: '3LHYvj5ZejV1NLqncEObSJ', name: 'Vaelis',            image_url: 'https://i.scdn.co/image/ab6761610000e5eb05e2f96f53a2810f5dcdd6c1', accent: '#8b5cf6', sort_order: 10, album_only: false, locked: false },
-  { artist_id: '3p3U04w2DaiBzuYMZnYr00', name: 'JC Chasez',         image_url: 'https://i.scdn.co/image/ab6761610000e5eb784d1c3b5bb30c5db83c8fe2', accent: '#e74c3c', sort_order: 11, album_only: false, locked: false },
-  { artist_id: '4qwGe91Bz9K2T8jXTZ815W', name: 'Janet Jackson',     image_url: 'https://i.scdn.co/image/ab6761610000e5eb8b290c36cbc9e89827ff562a', accent: '#d81b60', sort_order: 14, album_only: false, locked: false },
+  { artist_id: '2dIgFjalVxs4ThymZ67YCE', name: 'Stray Kids', accent: '#e2e2e7', sort_order: 1, album_only: false, locked: false },
+  { artist_id: '4UIOuc84ExWojcUzFGtb8W', name: 'Felix', accent: '#ffb703', sort_order: 2, album_only: false, locked: false },
+  { artist_id: '3XSid6KaiKoMAVZs2ug3yw', name: 'Changbin', accent: '#f97316', sort_order: 3, album_only: false, locked: false },
+  { artist_id: '46YvTuKiPBUu5KP9818J2F', name: 'HAN', accent: '#22d3ee', sort_order: 4, album_only: false, locked: false },
+  { artist_id: '5jRUIqBSxmsBPNiEwKUjgZ', name: 'Bangchan', accent: '#14b8a6', sort_order: 5, album_only: false, locked: false },
+  { artist_id: '1odvXbzhdzNajv6un9x5Mc', name: 'I.N', accent: '#84cc16', sort_order: 6, album_only: false, locked: false },
+  { artist_id: '04jivE3Ek7Xu8WSGVmEqUn', name: 'Lee Know', accent: '#eab308', sort_order: 7, album_only: false, locked: false },
+  { artist_id: '0ymFDpsRImjK673AGgFBcg', name: 'Hyunjin', accent: '#f43f5e', sort_order: 8, album_only: false, locked: false },
 ];
 
 // True if the given artist id is currently flagged `locked` in the live roster
