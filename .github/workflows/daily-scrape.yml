@@ -3,7 +3,7 @@ name: Spotify Stream Scrape
 on:
   # Run once per day by default; targeted/admin runs can still use dispatch.
   schedule:
-    - cron: '17 6 * * *'
+      - cron: '0 21 * * *'
   workflow_dispatch:
     inputs:
       force:
