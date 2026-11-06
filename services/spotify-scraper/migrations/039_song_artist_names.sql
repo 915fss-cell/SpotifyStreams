@@ -1,0 +1,2 @@
+ALTER TABLE songs
+  ADD COLUMN IF NOT EXISTS artist_names TEXT[] NOT NULL DEFAULT '{}';
