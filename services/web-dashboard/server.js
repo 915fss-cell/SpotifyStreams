@@ -2279,7 +2279,7 @@ app.get('/api/songs', requireAuth, validateArtistAccess,
         CASE 
           WHEN s.album_id IN ('0tcExuDWMQdBbwSpqN8Ku2', '2scB1uhcCI1TSf6b9TCZK3', '51lCQxAHpJHuqvvK0z12zp', '1tze7ApbUfn71mNcaixlX6', '3N1D55OU4TgweV2SSx6rpl', '2T4Y4BOSbReX4EEM79hIO6', '5DEGO898K51fENd1Jt0Rek', '3E81KB8Gxn4kkh8GP5M3DK', '6G2boZuVyTIIxlmTG52NsI', '0NvpeY8oCm6oIlhH5Jw4fo') THEN 'https://i.scdn.co/image/ab67616d0000b273c68f26a3d34fbd0faed2b473'
           WHEN s.album_id IN (${ATD_REMIX_SINGLE_IDS_SQL}) THEN '${ATD_ULTIMATE_COVER}'
-          ELSE NULL::text
+          ELSE COALESCE(s.album_image_url, a.image_url)
         END AS album_cover_url,
         dsc.recorded_date,
         dsc.cumulative::bigint AS cumulative,
@@ -2386,7 +2386,7 @@ app.get('/api/trending', requireAuth, validateArtistAccess,
         SELECT
           s.id, s.title, s.is_featured,
           a.title AS album_title,
-          NULL::text AS album_cover_url,
+          COALESCE(s.album_image_url, a.image_url) AS album_cover_url,
           win.cumulative, win.recent_avg, win.base_avg
         FROM win
         JOIN songs s ON s.id = win.canonical_id
@@ -5205,7 +5205,7 @@ app.delete('/api/admin/manual-merges/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// ═��═════════════════════ God-mode admin endpoints ═══════════════════════
+// ═���═════════════════════ God-mode admin endpoints ═══════════════════════
 
 // Admin: global overview — headline numbers, top daily movers, per-table DB
 // sizes. Read-only; backs the God tab's stat cards.
