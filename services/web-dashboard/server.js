@@ -1657,7 +1657,7 @@ app.get(['/api/charts', '/api/ai-charts'], requireAuth,
           s.title,
           s.album_id,
           a.title AS album_title,
-          NULL::text AS cover_url,
+          COALESCE(s.album_image_url, a.image_url) AS cover_url,
           a.album_group,
           credit.artist_id,
           credit.artist_name,
@@ -1842,7 +1842,7 @@ app.get(['/api/charts', '/api/ai-charts'], requireAuth,
         -- Rewind and other editions can have their physical tracks rooted on
         -- the deluxe edition. Pull those copies only for albums already in the
         -- category scope; the old all-songs join caused multi-minute spills.
-        SELECT credit.artist_id, s.album_id, a.title, NULL::text AS cover_url, a.album_group,
+        SELECT credit.artist_id, s.album_id, a.title, COALESCE(s.album_image_url, a.image_url) AS cover_url, a.album_group,
                COALESCE(s.canonical_id, s.id), s.title
         FROM album_candidate_ids candidate_album
         JOIN songs s ON s.album_id = candidate_album.album_id
