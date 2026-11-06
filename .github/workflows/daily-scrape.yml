@@ -53,6 +53,15 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: node migrate.js
 
+      - name: Backfill missing album covers
+        continue-on-error: true
+        timeout-minutes: 20
+        working-directory: services/spotify-scraper
+        env:
+          SP_DC:        ${{ secrets.SP_DC }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: node backfill-album-covers.js
+
       - name: Run scraper
         id: scraper
         working-directory: services/spotify-scraper
