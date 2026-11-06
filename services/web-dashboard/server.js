@@ -1151,9 +1151,11 @@ app.get('/api/spotify/streams', async (req, res) => {
           s.id AS song_id,
           s.title,
           s.album_id,
+          s.spotify_track_id,
           s.primary_artist,
+          COALESCE(s.album_image_url, a.image_url) AS album_image_url,
+          COALESCE(s.album_image_url, a.image_url) AS cover_url,
           COALESCE(s.artist_ids, ARRAY[]::text[]) AS artist_ids,
-          a.image_url AS cover_url,
           ss.stream_count,
           ss.recorded_date
           FROM songs s
@@ -5203,7 +5205,7 @@ app.delete('/api/admin/manual-merges/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// ═══════════════════════ God-mode admin endpoints ═══════════════════════
+// ═��═════════════════════ God-mode admin endpoints ═══════════════════════
 
 // Admin: global overview — headline numbers, top daily movers, per-table DB
 // sizes. Read-only; backs the God tab's stat cards.

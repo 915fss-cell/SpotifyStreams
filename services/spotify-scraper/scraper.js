@@ -249,6 +249,8 @@ async function processAlbum(page, client, album, artistUri, stats, backdateFirst
       id:             track.id,
       title:          trackTitle,
       album_id:       album.id,
+      spotify_track_id: track.id || track.uri?.split(':')[2] || null,
+      album_image_url:  album.image_url || track.albumImageUrl || track.cover_url || null,
       duration_ms:    track.duration_ms,
       track_number:   track.track_number,
       is_featured:    isFeaturedTrack,
