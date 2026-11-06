@@ -77,8 +77,8 @@ async function upsertSong(client, song) {
   //  - Mevcut own (is_featured=false) → güncelleme YAPMA
   //  - Mevcut featured → ancak title/duration güncellenebilir, album değişmez
   await client.query(
-    `INSERT INTO songs (id, title, album_id, duration_ms, track_number, is_featured, primary_artist, is_solo, artist_ids)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `INSERT INTO songs (id, title, album_id, duration_ms, track_number, is_featured, primary_artist, is_solo, artist_ids, spotify_track_id, album_image_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      ON CONFLICT (id) DO UPDATE
        SET title          = EXCLUDED.title,
            duration_ms    = EXCLUDED.duration_ms,
@@ -90,10 +90,12 @@ async function upsertSong(client, song) {
            primary_artist = CASE WHEN songs.is_featured AND NOT EXCLUDED.is_featured THEN EXCLUDED.primary_artist
                                  ELSE songs.primary_artist END,
            is_solo        = EXCLUDED.is_solo,
-           artist_ids     = CASE WHEN cardinality(EXCLUDED.artist_ids) > 0 THEN EXCLUDED.artist_ids ELSE songs.artist_ids END`,
+           artist_ids        = CASE WHEN cardinality(EXCLUDED.artist_ids) > 0 THEN EXCLUDED.artist_ids ELSE songs.artist_ids END,
+           spotify_track_id  = COALESCE(EXCLUDED.spotify_track_id, songs.spotify_track_id),
+           album_image_url   = COALESCE(EXCLUDED.album_image_url, songs.album_image_url)`,
     [song.id, song.title, song.album_id, song.duration_ms, song.track_number,
      song.is_featured ?? false, song.primary_artist ?? null, song.is_solo ?? true,
-     song.artist_ids ?? []]
+     song.artist_ids ?? [], song.spotify_track_id ?? song.id ?? null, song.album_image_url ?? null]
   );
 }
 
@@ -197,18 +199,18 @@ async function upsertSongsBatch(client, songs) {
   const byId = new Map();
   for (const s of songs) byId.set(s.id, s); // last write wins, like sequential upserts
   const rows = [...byId.values()];
-  const cols = 9;
+  const cols = 11;
   const values = [];
   const params = [];
   rows.forEach((s, i) => {
     const b = i * cols;
-    values.push(`($${b+1}, $${b+2}, $${b+3}, $${b+4}, $${b+5}, $${b+6}, $${b+7}, $${b+8}, $${b+9})`);
+    values.push(`($${b+1}, $${b+2}, $${b+3}, $${b+4}, $${b+5}, $${b+6}, $${b+7}, $${b+8}, $${b+9}, $${b+10}, $${b+11})`);
     params.push(s.id, s.title, s.album_id, s.duration_ms, s.track_number,
                 s.is_featured ?? false, s.primary_artist ?? null, s.is_solo ?? true,
-                s.artist_ids ?? []);
+                s.artist_ids ?? [], s.spotify_track_id ?? s.id ?? null, s.album_image_url ?? null);
   });
   await client.query(
-    `INSERT INTO songs (id, title, album_id, duration_ms, track_number, is_featured, primary_artist, is_solo, artist_ids)
+    `INSERT INTO songs (id, title, album_id, duration_ms, track_number, is_featured, primary_artist, is_solo, artist_ids, spotify_track_id, album_image_url)
      VALUES ${values.join(', ')}
      ON CONFLICT (id) DO UPDATE
        SET title          = EXCLUDED.title,
@@ -221,7 +223,9 @@ async function upsertSongsBatch(client, songs) {
            primary_artist = CASE WHEN songs.is_featured AND NOT EXCLUDED.is_featured THEN EXCLUDED.primary_artist
                                  ELSE songs.primary_artist END,
            is_solo        = EXCLUDED.is_solo,
-           artist_ids     = CASE WHEN cardinality(EXCLUDED.artist_ids) > 0 THEN EXCLUDED.artist_ids ELSE songs.artist_ids END`,
+           artist_ids        = CASE WHEN cardinality(EXCLUDED.artist_ids) > 0 THEN EXCLUDED.artist_ids ELSE songs.artist_ids END,
+           spotify_track_id  = COALESCE(EXCLUDED.spotify_track_id, songs.spotify_track_id),
+           album_image_url   = COALESCE(EXCLUDED.album_image_url, songs.album_image_url)`,
     params
   );
 }
