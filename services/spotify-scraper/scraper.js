@@ -1037,18 +1037,14 @@ async function run() {
 
       if (!artistsToRun.length) {
         artistsToRun = [
-          { id: '31TPClRtHm23RisEBtV3X7', name: 'Justin Timberlake', album_only: false },
-          { id: '5L1lO4eRHmJ7a0Q6csE5cT', name: 'LISA', album_only: false },
-          { id: '1HY2Jd0NmPuamShAr6KMms', name: 'Lady Gaga', album_only: true },
-          { id: '6qqNVTkY8uBg9cP3Jd7DAH', name: 'Billie Eilish', album_only: false },
-          { id: '66CXWjxzNUsdJxJ2JdwvnR', name: 'Ariana Grande', album_only: true },
-          { id: '6Ff53KvcvAj5U7Z1vojB5o', name: '*NSYNC', album_only: false },
-          { id: '3p3U04w2DaiBzuYMZnYr00', name: 'JC Chasez', album_only: false },
-          { id: '3LHYvj5ZejV1NLqncEObSJ', name: 'Vaelis', album_only: false },
           { id: '2dIgFjalVxs4ThymZ67YCE', name: 'Stray Kids', album_only: false },
           { id: '4UIOuc84ExWojcUzFGtb8W', name: 'Felix', album_only: false },
-          { id: '2W8yFh0Ga6Yf3jiayVxwkE', name: 'Dove Cameron', album_only: false },
-          { id: '4qwGe91Bz9K2T8jXTZ815W', name: 'Janet Jackson', album_only: false }
+          { id: '3XSid6KaiKoMAVZs2ug3yw', name: 'Changbin', album_only: false },
+          { id: '46YvTuKiPBUu5KP9818J2F', name: 'HAN', album_only: false },
+          { id: '5jRUIqBSxmsBPNiEwKUjgZ', name: 'Bangchan', album_only: false },
+          { id: '1odvXbzhdzNajv6un9x5Mc', name: 'I.N', album_only: false },
+          { id: '04jivE3Ek7Xu8WSGVmEqUn', name: 'Lee Know', album_only: false },
+          { id: '0ymFDpsRImjK673AGgFBcg', name: 'Hyunjin', album_only: false }
         ];
         allTrackedArtistIds = artistsToRun.map(a => a.id);
       } else if (!allTrackedArtistIds.length) {
