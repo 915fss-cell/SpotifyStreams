@@ -261,6 +261,12 @@ async function processAlbum(page, client, album, artistUri, stats, backdateFirst
         artistId,
         ...(track.artistUris || []).map(uri => uri.split(':')[2]).filter(Boolean),
       ])],
+      artist_names:   [...new Set([
+        artist.name,
+        ...(track.artistNames || track.artists || []).map(item =>
+          typeof item === 'string' ? item : item.name || item.profile?.name
+        ).filter(Boolean),
+      ])],
       is_solo:        isSolo,
     });
     if (track.playCount > 0) {
