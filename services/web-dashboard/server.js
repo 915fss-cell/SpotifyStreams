@@ -1153,10 +1153,12 @@ app.get('/api/spotify/streams', async (req, res) => {
           s.album_id,
           s.primary_artist,
           COALESCE(s.artist_ids, ARRAY[]::text[]) AS artist_ids,
+          a.image_url AS cover_url,
           ss.stream_count,
           ss.recorded_date
-        FROM songs s
-        JOIN stream_stats ss ON ss.song_id = s.id
+          FROM songs s
+          LEFT JOIN albums a ON a.id = s.album_id
+          JOIN stream_stats ss ON ss.song_id = s.id
         ORDER BY s.id, ss.recorded_date DESC, ss.recorded_at DESC
       `),
     ]);
