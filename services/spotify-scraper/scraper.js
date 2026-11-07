@@ -262,7 +262,7 @@ async function processAlbum(page, client, album, artistUri, stats, backdateFirst
         ...(track.artistUris || []).map(uri => uri.split(':')[2]).filter(Boolean),
       ])],
       artist_names:   [...new Set([
-        artist.name,
+        targetArtistName,
         ...(track.artistNames || track.artists || []).map(item =>
           typeof item === 'string' ? item : item.name || item.profile?.name
         ).filter(Boolean),
@@ -297,6 +297,7 @@ async function scrapeArtist(page, client, artistId, stats, allTrackedArtistIds =
   )).rows.length;
   console.log(`\n[scraper] Discovering albums for artist: ${artistId}...${artistIsNew ? ' (new artist → baseline back-date)' : ''}`);
   let { albums: discoveredAlbums, own_count, feat_count, stats: artistStats } = await discoverAllAlbumsPuppeteer(page, artistId, { includeAppearsOn: !albumOnly });
+  const targetArtistName = artistStats?.name || artistId;
 
   // Persist artist-level stats (monthly listeners, followers, world rank) as a daily snapshot.
   if (artistStats && artistStats.monthly_listeners != null) {
