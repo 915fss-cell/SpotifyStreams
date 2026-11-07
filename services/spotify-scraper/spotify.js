@@ -273,6 +273,14 @@ async function fetchAlbumTracks(page, albumId) {
 
         if (data && !data.__err) {
           const items = data?.data?.albumUnion?.tracksV2?.items ?? [];
+          // An HTTP-200 GraphQL response can still contain no tracks when
+          // Spotify changes the persisted-query response shape. Fall back to
+          // album navigation instead of treating that as a successful scrape.
+          if (!items.length) {
+            if (attempt === 0) { await new Promise(r => setTimeout(r, 400)); continue; }
+            console.warn(`[fetchAlbumTracks] GraphQL returned no tracks for album ${albumId}; falling back to page navigation.`);
+            break;
+          }
           return items.map(item => {
             const t = item.track;
             if (!t) return null;
