@@ -282,15 +282,17 @@ async function fetchAlbumTracks(page, albumId) {
             break;
           }
           return items.map(item => {
-            const t = item.track;
+            const rawTrack = item.track ?? item.trackUnion ?? item;
+            const t = rawTrack?.track ?? rawTrack;
             if (!t) return null;
-            const artistUris = (t.artists?.items ?? []).map(x => x.uri);
+            const artistItems = Array.isArray(t.artists) ? t.artists : (t.artists?.items ?? []);
+            const artistUris = artistItems.map(x => x.uri || x.id).filter(Boolean);
             return {
-              id:           t.uri?.split(':')[2],
-              title:        t.name,
+              id:           t.uri?.split(':')[2] || t.id || null,
+              title:        t.name || t.title || null,
               duration_ms:  t.duration?.totalMilliseconds ?? null,
               track_number: t.trackNumber ?? null,
-              playCount:    parseInt(t.playcount ?? '0', 10),
+              playCount:    parseInt(t.playcount ?? t.playCount ?? t.play_count ?? '0', 10),
               artistUris,
             };
           }).filter(Boolean);
