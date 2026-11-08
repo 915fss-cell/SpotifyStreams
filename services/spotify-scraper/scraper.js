@@ -178,7 +178,7 @@ function isCoverOrTribute(title) {
   return false;
 }
 
-async function processAlbum(page, client, album, artistUri, stats, backdateFirst = false, pinnedTrackIds = new Set()) {
+async function processAlbum(page, client, album, artistUri, stats, backdateFirst = false, pinnedTrackIds = new Set(), targetArtistName = null) {
   const tracks = await fetchAlbumTracks(page, album.id);
   let kept = 0;
   // Collect rows and flush in two batched writes at the end of the album instead
@@ -262,7 +262,7 @@ async function processAlbum(page, client, album, artistUri, stats, backdateFirst
         ...(track.artistUris || []).map(uri => uri.split(':')[2]).filter(Boolean),
       ])],
       artist_names:   [...new Set([
-        targetArtistName,
+        targetArtistName || artistUri,
         ...(track.artistNames || track.artists || []).map(item =>
           typeof item === 'string' ? item : item.name || item.profile?.name
         ).filter(Boolean),
@@ -725,7 +725,7 @@ async function scrapeArtist(page, client, artistId, stats, allTrackedArtistIds =
     const tag = isFeatured ? 'feat' : 'own ';
     console.log(`[${tag} ${i+1}/${albumsToScrape.length}] "${a.title}"`);
     try {
-      const n = await processAlbum(page, client, { ...a, is_featured: isFeatured }, artistUri, stats, artistIsNew, pinnedTrackIds);
+      const n = await processAlbum(page, client, { ...a, is_featured: isFeatured }, artistUri, stats, artistIsNew, pinnedTrackIds, targetArtistName);
       console.log(`           ${n} track`);
     } catch (err) { failedAlbums++; console.warn('  Hata:', err.message); }
     await sleep(DELAY_MS);
@@ -1182,7 +1182,7 @@ async function run() {
       console.log('[scraper] OUTCOME=updated');
 
       if (failedArtists.length) {
-        console.error(`[scraper] ⚠️ ${failedArtists.length}/${attempted} sanatçı başarısız:`);
+        console.error(`[scraper] ⚠️ ${failedArtists.length}/${attempted} sanatçı başarıs��z:`);
         for (const f of failedArtists) {
           console.error(`  - ${f.name} (${f.id}): ${f.message}${f.permanent ? '  → tracked_artists.active = false yap' : ''}`);
         }
