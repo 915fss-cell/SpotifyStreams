@@ -74,11 +74,11 @@ jobs:
           SCRAPE_ARTISTS: ${{ inputs.artists }}
         run: |
           set -o pipefail
-          ARGS=""
-          if [ -n "$SCRAPE_ARTISTS" ]; then ARGS="--artists=$SCRAPE_ARTISTS"; fi
-          echo "Running: node scraper.js $ARGS (force=$FORCE_SCRAPE)"
+          ARGS=()
+          if [ -n "$SCRAPE_ARTISTS" ]; then ARGS+=("--artists=$SCRAPE_ARTISTS"); fi
+          echo "Running: node scraper.js ${ARGS[*]} (force=$FORCE_SCRAPE)"
           SCRAPER_LOG=$(mktemp)
-          node scraper.js $ARGS | tee "$SCRAPER_LOG"
+          node scraper.js "${ARGS[@]}" | tee "$SCRAPER_LOG"
           if grep -q '^\[scraper\] OUTCOME=updated$' "$SCRAPER_LOG"; then
             echo "did_update=true" >> "$GITHUB_OUTPUT"
             echo "New Spotify data processed; maintenance steps will run."
@@ -100,9 +100,9 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SCRAPE_ARTISTS: ${{ inputs.artists }}
         run: |
-          ARGS=""
-          if [ -n "$SCRAPE_ARTISTS" ]; then ARGS="--artists=$SCRAPE_ARTISTS --force"; fi
-          node reconcile-kworb.js $ARGS
+          ARGS=()
+          if [ -n "$SCRAPE_ARTISTS" ]; then ARGS+=("--artists=$SCRAPE_ARTISTS" "--force"); fi
+          node reconcile-kworb.js "${ARGS[@]}"
 
       # Read track pages to repair stale album-page counts. Only increases
       # are applied; stream drops use a separate verification path.

@@ -1061,8 +1061,14 @@ async function run() {
       }
 
       if (artistFilterArg) {
-        const allowedIds = artistFilterArg.split('=')[1].split(',');
-        artistsToRun = artistsToRun.filter(a => allowedIds.includes(a.id));
+        const allowedArtists = artistFilterArg.split('=')[1]
+          .split(',')
+          .map(value => value.trim().toLowerCase())
+          .filter(Boolean);
+        artistsToRun = artistsToRun.filter(a =>
+          allowedArtists.includes(a.id.toLowerCase()) ||
+          allowedArtists.includes(a.name.trim().toLowerCase())
+        );
         console.log(`[scraper] Filtering run to artists: ${artistsToRun.map(a => a.name).join(', ')}`);
       }
 
