@@ -70,7 +70,7 @@ jobs:
           SP_DC:        ${{ secrets.SP_DC }}
           SP_KEY:       ${{ secrets.SP_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          FORCE_SCRAPE: ${{ inputs.force }}
+          FORCE_SCRAPE: ${{ github.event_name == 'schedule' || inputs.force == true }}
           SCRAPE_ARTISTS: ${{ inputs.artists }}
         run: |
           set -o pipefail
